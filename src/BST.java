@@ -4,11 +4,10 @@ public class BST {
 
     static int LARGE_NUM = 1000;
 
-    static double[][][] dp;
-
     static class OBST {
         static double val;
         static int[][] root;
+        static double[][][] dp;
     }
 
     static class OBST2 {
@@ -25,12 +24,12 @@ public class BST {
         return res;
     }
 
-    static double opt_bst(int i, int j, int d, double[] p, double[] q, int[][] root) {
+    static double opt_bst(int i, int j, int d, double[] p, double[] q, OBST obst) {
         double res = LARGE_NUM;
 
         // Get results from memo table if available
-        if(dp[i][j][d] != 0.0) {
-            return dp[i][j][d];
+        if(obst.dp[i][j][d] != 0.0) {
+            return obst.dp[i][j][d];
         }
 
         // Case is a leaf
@@ -38,41 +37,41 @@ public class BST {
             double val1 = (d + 1) * p[i];
             double val2 = (d + 2) * q[i];
             double val3 = (d + 2) * q[i + 1];
-            root[i][j] = i;
+            obst.root[i][j] = i;
             return val1 + val2 + val3;
         }
 
-        // Case is subtree
+        // Case is (sub) tree
         if(j > i) {
-            double val1 = (d + 1) * p[i] + (d + 2) * q[i] + opt_bst(i + 1, j, d + 1, p, q, root);
-            double val2 = (d + 1) * p[j] + (d + 2) * q[j + 1] + opt_bst(i, j - 1, d + 1, p, q, root);
+            double val1 = (d + 1) * p[i] + (d + 2) * q[i] + opt_bst(i + 1, j, d + 1, p, q, obst);
+            double val2 = (d + 1) * p[j] + (d + 2) * q[j + 1] + opt_bst(i, j - 1, d + 1, p, q, obst);
             for(int k = i + 1; k <= j - 1; ++k) {
-                double val1_loc = opt_bst(i, k - 1, d + 1, p, q, root);
-                double val2_loc = opt_bst(k + 1, j, d + 1, p, q, root);
+                double val1_loc = opt_bst(i, k - 1, d + 1, p, q, obst);
+                double val2_loc = opt_bst(k + 1, j, d + 1, p, q, obst);
                 double res_loc = (d + 1) * p[k] + val1_loc + val2_loc;
 
-                // Get root
+                // Get (sub) root
                 if(res > res_loc) {
                     res = res_loc;
-                    root[i][j] = k;
+                    obst.root[i][j] = k;
                 }
             }
 
             // Case node i is (sub) root
             if(res > val1) {
                 res = val1;
-                root[i][j] = i;
+                obst.root[i][j] = i;
             }
 
             // Case node j is (sub) root
             if(res > val2) {
                 res = val2;
-                root[i][j] = j;
+                obst.root[i][j] = j;
             }
         }
 
         // Store results in memo table
-        dp[i][j][d] = res;
+        obst.dp[i][j][d] = res;
 
         return res;
     }
@@ -210,10 +209,10 @@ public class BST {
         // Initialize memo and root tables
         OBST obst = new OBST();
         obst.root = new int[n][n];
-        dp = new double[n][n][n];
+        obst.dp = new double[n][n][n];
 
         // Compute optimal binary search tree
-        obst.val = opt_bst(0, n - 1, 0, p, q, obst.root);
+        obst.val = opt_bst(0, n - 1, 0, p, q, obst);
 
         return obst;
     }
